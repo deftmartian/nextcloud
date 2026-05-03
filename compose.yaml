@@ -191,6 +191,7 @@ services:
       - WHITEBOARD_ENABLED
     stop_grace_period: 600s
     restart: unless-stopped
+    shm_size: 134217728
     cap_drop:
       - NET_RAW
     networks:
@@ -278,8 +279,10 @@ services:
       - server_name=${NC_DOMAIN}
       - DONT_GEN_SSL_CERT=1
     restart: unless-stopped
+    shm_size: 268435456
+    tmpfs:
+      - /tmp
     cap_add:
-      - MKNOD
       - SYS_ADMIN
       - SYS_CHROOT
       - FOWNER
@@ -425,6 +428,9 @@ services:
       - http.port=9200
       - xpack.license.self_generated.type=basic
       - xpack.security.enabled=false
+      - indices.fielddata.cache.size=20%
+      - indices.memory.index_buffer_size=20%
+      - thread_pool.write.queue_size=1000
       - FULLTEXTSEARCH_PASSWORD
     volumes:
       - nextcloud_aio_elasticsearch:/usr/share/elasticsearch/data:rw
