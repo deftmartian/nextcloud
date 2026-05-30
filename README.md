@@ -4,7 +4,7 @@ Manual Docker Compose deployment of Nextcloud AIO, adapted for ipvlan networking
 
 ## Updating
 
-**Do not auto-update images.** AIO image updates can require compose.yml and .env changes (new env vars, changed defaults, added/removed services). Pulling new images without syncing those files can break the stack silently.
+**Do not auto-update images.** AIO image updates can require `compose.yaml` and environment changes (new env vars, changed defaults, added/removed services). Pulling new images without syncing those files can break the stack silently.
 
 ### Update procedure
 
@@ -15,22 +15,22 @@ Manual Docker Compose deployment of Nextcloud AIO, adapted for ipvlan networking
 
 2. Check upstream for compose changes:
    ```bash
-   curl -sO https://raw.githubusercontent.com/nextcloud/all-in-one/main/manual-install/latest.yml
-   diff compose.yml latest.yml
+   curl -fsSL -o /tmp/nextcloud-aio-latest.yml https://raw.githubusercontent.com/nextcloud/all-in-one/main/manual-install/latest.yml
+   diff -u compose.yaml /tmp/nextcloud-aio-latest.yml
    ```
    Review the diff carefully. Look for:
    - New or removed environment variables
    - New services or changed service definitions
    - Changed volume mounts, ports, or healthchecks
 
-3. Check upstream for .env changes:
+3. Check upstream for tracked environment example changes:
    ```bash
-   curl -sO https://raw.githubusercontent.com/nextcloud/all-in-one/main/manual-install/sample.conf
-   diff .env sample.conf
+   curl -fsSL -o /tmp/nextcloud-aio-sample.conf https://raw.githubusercontent.com/nextcloud/all-in-one/main/manual-install/sample.conf
+   diff -u .env.example /tmp/nextcloud-aio-sample.conf
    ```
-   Look for new variables or renamed ones. Add any new required variables to your .env.
+   Look for new variables or renamed ones. Add any new required variables to `.env.example`, then update the deployment `.env` manually without committing it.
 
-4. Apply relevant changes to your compose.yml and .env, keeping your customizations (ipvlan, removed services, memories transcoder, etc.).
+4. Apply relevant changes to `compose.yaml` and `.env.example`, keeping your customizations (ipvlan, removed services, memories transcoder, etc.).
 
 5. Pull new images and restart:
    ```bash
@@ -40,8 +40,8 @@ Manual Docker Compose deployment of Nextcloud AIO, adapted for ipvlan networking
 
 ### What NOT to do
 
-- **Don't use Arcane's image update feature for this stack.** It would pull new images without updating compose.yml/.env, which can cause breakage.
-- **Don't fork the AIO repo to track changes.** Your compose.yml is heavily customized (ipvlan networking, removed services, added memories transcoder). Merge conflicts on every upstream change would be constant and error-prone. A manual diff is lower effort and safer.
+- **Don't use Arcane's image update feature for this stack.** It would pull new images without updating `compose.yaml` or environment variables, which can cause breakage.
+- **Don't fork the AIO repo to track changes.** Your `compose.yaml` is heavily customized (ipvlan networking, removed services, added memories transcoder). Merge conflicts on every upstream change would be constant and error-prone. A manual diff is lower effort and safer.
 
 ### Recommended workflow
 
