@@ -39,6 +39,7 @@ services:
       - APACHE_PORT
       - AIO_LOG_LEVEL
       - ONLYOFFICE_HOST=nextcloud-aio-onlyoffice
+      - EUROOFFICE_HOST=nextcloud-aio-eurooffice
       - TZ=${TIMEZONE}
       - APACHE_MAX_SIZE
       - APACHE_MAX_TIME=${NEXTCLOUD_MAX_TIME}
@@ -158,15 +159,18 @@ services:
       - TURN_SECRET
       - SIGNALING_SECRET
       - ONLYOFFICE_SECRET
+      - EUROOFFICE_SECRET
       - AIO_LOG_LEVEL
       - NEXTCLOUD_MOUNT
       - CLAMAV_ENABLED
       - CLAMAV_HOST=nextcloud-aio-clamav
       - ONLYOFFICE_ENABLED=false        # Disabled
+      - EUROOFFICE_ENABLED
       - COLLABORA_ENABLED=true          # Enabled
       - COLLABORA_HOST=nextcloud-aio-collabora
       - TALK_ENABLED
       - ONLYOFFICE_HOST=nextcloud-aio-onlyoffice
+      - EUROOFFICE_HOST=nextcloud-aio-eurooffice
       - UPDATE_NEXTCLOUD_APPS
       - TZ=${TIMEZONE}
       - TALK_PORT
@@ -438,11 +442,13 @@ services:
       - discovery.type=single-node
       - http.port=9200
       - xpack.license.self_generated.type=basic
-      - xpack.security.enabled=false
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
       - indices.fielddata.cache.size=20%
       - indices.memory.index_buffer_size=20%
       - thread_pool.write.queue_size=1000
-      - FULLTEXTSEARCH_PASSWORD
+      - ELASTIC_PASSWORD=${FULLTEXTSEARCH_PASSWORD}
     volumes:
       - nextcloud_aio_elasticsearch:/usr/share/elasticsearch/data:rw
     restart: unless-stopped
