@@ -8,10 +8,11 @@ When the user asks to "update this repo", "pull the latest", or "do a diff" in t
 
 The expected workflow is to compare this customized stack against upstream Nextcloud AIO manual install files:
 
-1. Fetch upstream manual install files:
+1. Resolve the current upstream AIO commit and fetch manual install files pinned to that commit:
    ```bash
-   curl -fsSL -o /tmp/nextcloud-aio-latest.yml https://raw.githubusercontent.com/nextcloud/all-in-one/main/manual-install/latest.yml
-   curl -fsSL -o /tmp/nextcloud-aio-sample.conf https://raw.githubusercontent.com/nextcloud/all-in-one/main/manual-install/sample.conf
+   UPSTREAM_AIO_SHA="$(git ls-remote https://github.com/nextcloud/all-in-one.git refs/heads/main | awk '{print $1}')"
+   curl -fsSL -o /tmp/nextcloud-aio-latest.yml "https://raw.githubusercontent.com/nextcloud/all-in-one/${UPSTREAM_AIO_SHA}/manual-install/latest.yml"
+   curl -fsSL -o /tmp/nextcloud-aio-sample.conf "https://raw.githubusercontent.com/nextcloud/all-in-one/${UPSTREAM_AIO_SHA}/manual-install/sample.conf"
    ```
 2. Diff upstream Compose against the local stack:
    ```bash
@@ -22,6 +23,7 @@ The expected workflow is to compare this customized stack against upstream Nextc
    diff -u .env.example /tmp/nextcloud-aio-sample.conf
    ```
 4. Report changes that may need manual adoption, especially new or removed environment variables, service changes, volume changes, ports, healthchecks, image behavior, or changed defaults.
+5. If making any repo edit as part of the sync, add or update `UPSTREAM-SYNC.md` with the exact `${UPSTREAM_AIO_SHA}`, source files reviewed, changes adopted, and intentional non-adoptions.
 
 Only run `git pull` if the user explicitly asks to update the Git checkout itself. The remote may require user-controlled SSH hardware-key authentication, so do not treat a failed `git pull` as part of the normal AIO update workflow.
 

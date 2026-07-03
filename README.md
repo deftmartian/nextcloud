@@ -15,7 +15,8 @@ Manual Docker Compose deployment of Nextcloud AIO, adapted for ipvlan networking
 
 2. Check upstream for compose changes:
    ```bash
-   curl -fsSL -o /tmp/nextcloud-aio-latest.yml https://raw.githubusercontent.com/nextcloud/all-in-one/main/manual-install/latest.yml
+   UPSTREAM_AIO_SHA="$(git ls-remote https://github.com/nextcloud/all-in-one.git refs/heads/main | awk '{print $1}')"
+   curl -fsSL -o /tmp/nextcloud-aio-latest.yml "https://raw.githubusercontent.com/nextcloud/all-in-one/${UPSTREAM_AIO_SHA}/manual-install/latest.yml"
    diff -u compose.yaml /tmp/nextcloud-aio-latest.yml
    ```
    Review the diff carefully. Look for:
@@ -25,14 +26,16 @@ Manual Docker Compose deployment of Nextcloud AIO, adapted for ipvlan networking
 
 3. Check upstream for tracked environment example changes:
    ```bash
-   curl -fsSL -o /tmp/nextcloud-aio-sample.conf https://raw.githubusercontent.com/nextcloud/all-in-one/main/manual-install/sample.conf
+   curl -fsSL -o /tmp/nextcloud-aio-sample.conf "https://raw.githubusercontent.com/nextcloud/all-in-one/${UPSTREAM_AIO_SHA}/manual-install/sample.conf"
    diff -u .env.example /tmp/nextcloud-aio-sample.conf
    ```
    Look for new variables or renamed ones. Add any new required variables to `.env.example`, then update the deployment `.env` manually without committing it.
 
 4. Apply relevant changes to `compose.yaml` and `.env.example`, keeping your customizations (ipvlan, removed services, memories transcoder, etc.).
 
-5. Pull new images and restart:
+5. Add an entry to `UPSTREAM-SYNC.md` with the exact `${UPSTREAM_AIO_SHA}`, the source files reviewed, changes adopted, and notable upstream changes intentionally not adopted.
+
+6. Pull new images and restart:
    ```bash
    docker compose pull
    docker compose up -d
