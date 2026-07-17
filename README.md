@@ -8,12 +8,7 @@ Manual Docker Compose deployment of Nextcloud AIO, adapted for ipvlan networking
 
 ### Update procedure
 
-1. Stop the stack:
-   ```bash
-   docker compose down
-   ```
-
-2. Check upstream for compose changes:
+1. Check upstream for compose changes while the stack remains online:
    ```bash
    UPSTREAM_AIO_SHA="$(git ls-remote https://github.com/nextcloud/all-in-one.git refs/heads/main | awk '{print $1}')"
    curl -fsSL -o /tmp/nextcloud-aio-latest.yml "https://raw.githubusercontent.com/nextcloud/all-in-one/${UPSTREAM_AIO_SHA}/manual-install/latest.yml"
@@ -24,21 +19,33 @@ Manual Docker Compose deployment of Nextcloud AIO, adapted for ipvlan networking
    - New services or changed service definitions
    - Changed volume mounts, ports, or healthchecks
 
-3. Check upstream for tracked environment example changes:
+2. Check upstream for tracked environment example changes:
    ```bash
    curl -fsSL -o /tmp/nextcloud-aio-sample.conf "https://raw.githubusercontent.com/nextcloud/all-in-one/${UPSTREAM_AIO_SHA}/manual-install/sample.conf"
    diff -u .env.example /tmp/nextcloud-aio-sample.conf
    ```
    Look for new variables or renamed ones. Add any new required variables to `.env.example`, then update the deployment `.env` manually without committing it.
 
-4. Apply relevant changes to `compose.yaml` and `.env.example`, keeping your customizations (ipvlan, removed services, memories transcoder, etc.).
+3. Apply relevant changes to `compose.yaml` and `.env.example`, keeping your customizations (ipvlan, removed services, memories transcoder, etc.).
 
-5. Add an entry to `UPSTREAM-SYNC.md` with the exact `${UPSTREAM_AIO_SHA}`, the source files reviewed, changes adopted, and notable upstream changes intentionally not adopted.
+4. Add an entry to `UPSTREAM-SYNC.md` with the exact `${UPSTREAM_AIO_SHA}`, the source files reviewed, changes adopted, and notable upstream changes intentionally not adopted.
+
+5. Enter the maintenance window and establish a rollback point:
+   ```bash
+   docker compose down
+   ```
+   After the containers stop, create or confirm a current rollback point using the stack's established backup process. This repository does not prescribe the backup implementation.
 
 6. Pull new images and restart:
    ```bash
    docker compose pull
    docker compose up -d
+   ```
+
+7. Confirm that the containers are healthy and Nextcloud completed its startup:
+   ```bash
+   docker compose ps
+   docker compose exec --user www-data nextcloud-aio-nextcloud php occ status
    ```
 
 ### What NOT to do
@@ -71,7 +78,7 @@ https://github.com/nextcloud/all-in-one/releases
                     │                                │
                     │  Nextcloud    PostgreSQL        │
                     │  Redis       Notify-push       │
-                    │  Collabora   OnlyOffice        │
+                    │  Collabora                     │
                     │  ClamAV      Imaginary          │
                     │  Fulltextsearch                 │
                     │  Memories Transcoder (NVIDIA)   │
